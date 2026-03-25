@@ -5,6 +5,13 @@ import path from "path";
 import { revalidatePath } from "next/cache";
 import crypto from "crypto";
 import { prisma } from "./lib/prisma";
+import { v2 as cloudinary } from 'cloudinary';
+
+cloudinary.config({
+  cloud_name: process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function uploadImage(formData: FormData) {
   const file = formData.get("file") as File;
@@ -13,34 +20,47 @@ export async function uploadImage(formData: FormData) {
 
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
-  const id = crypto.randomUUID();
-  const ext = path.extname(file.name);
-  const filename = `${id}${ext}`;
+  const fileBase64 = `data:${file.type};base64,${buffer.toString("base64")}`;
   
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-  const filePath = path.join(uploadDir, filename);
-  fs.writeFileSync(filePath, buffer);
+  try {
+    const uploadRes = await cloudinary.uploader.upload(fileBase64, {
+      folder: "portfolio_images"
+    });
+    
+    const newImage = await prisma.image.create({
+      data: {
+        url: uploadRes.secure_url,
+        date: Date.now(),
+        folderId: folderId && folderId !== "default" ? folderId : null
+      }
+    });
 
-  const newImage = await prisma.image.create({
-    data: {
-      url: `/uploads/${filename}`,
-      date: Date.now(),
-      folderId: folderId && folderId !== "default" ? folderId : null
-    }
-  });
-
-  revalidatePath("/");
-  return { success: true, image: newImage };
+    revalidatePath("/");
+    return { success: true, image: newImage };
+  } catch (error) {
+    console.error("Upload error", error);
+    return { error: "Upload failed" };
+  }
 }
 
 export async function deleteImage(imageId: string) {
   const img = await prisma.image.findUnique({ where: { id: imageId } });
   if (!img) return { error: "Image not found" };
 
-  const filePath = path.join(process.cwd(), "public", img.url.replace(/^\//, ""));
-  if (fs.existsSync(filePath)) {
-    try { fs.unlinkSync(filePath); } catch (e) { console.error("Error deleting old file", e); }
+  if (img.url.includes("cloudinary.com")) {
+    try {
+      const urlParts = img.url.split('/');
+      const folderAndFile = urlParts.slice(-2).join('/');
+      const publicId = folderAndFile.split('.')[0];
+      await cloudinary.uploader.destroy(publicId);
+    } catch (e) {
+      console.error("Cloudinary delete error", e);
+    }
+  } else {
+    const filePath = path.join(process.cwd(), "public", img.url.replace(/^\//, ""));
+    if (fs.existsSync(filePath)) {
+      try { fs.unlinkSync(filePath); } catch (e) { console.error("Error deleting old file", e); }
+    }
   }
 
   await prisma.image.delete({ where: { id: imageId } });
@@ -76,31 +96,36 @@ export async function updateHeroImage(formData: FormData) {
   
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
-  const id = crypto.randomUUID();
-  const ext = path.extname(file.name);
-  const filename = `hero_${id}${ext}`;
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
-  const filePath = path.join(uploadDir, filename);
-  fs.writeFileSync(filePath, buffer);
-
-  const userData = await prisma.userData.findFirst();
-  if (userData?.heroImage) {
-    const oldPath = path.join(process.cwd(), "public", userData.heroImage.replace(/^\//, ""));
-    if (fs.existsSync(oldPath)) {
-        try { fs.unlinkSync(oldPath); } catch (e) {}
-    }
-  }
-
-  if (userData) {
-    await prisma.userData.update({
-      where: { id: userData.id },
-      data: { heroImage: `/uploads/${filename}` }
+  const fileBase64 = `data:${file.type};base64,${buffer.toString("base64")}`;
+  
+  try {
+    const uploadRes = await cloudinary.uploader.upload(fileBase64, {
+      folder: "portfolio_hero"
     });
-  }
 
-  revalidatePath("/");
-  return { success: true };
+    const userData = await prisma.userData.findFirst();
+    
+    // Attempt deleting old file if local
+    if (userData?.heroImage && !userData.heroImage.includes("cloudinary.com")) {
+      const oldPath = path.join(process.cwd(), "public", userData.heroImage.replace(/^\//, ""));
+      if (fs.existsSync(oldPath)) {
+          try { fs.unlinkSync(oldPath); } catch (e) {}
+      }
+    }
+
+    if (userData) {
+      await prisma.userData.update({
+        where: { id: userData.id },
+        data: { heroImage: uploadRes.secure_url }
+      });
+    }
+
+    revalidatePath("/");
+    return { success: true };
+  } catch (error) {
+    console.error("Hero upload error", error);
+    return { error: "Upload failed" };
+  }
 }
 
 export async function addFolder(name: string) {
