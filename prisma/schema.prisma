@@ -1,0 +1,50 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model AdminAuth {
+  id       String @id @default(cuid())
+  username String @unique
+  password String // hashed
+}
+
+model UserData {
+  id            String  @id @default(cuid())
+  aboutText     String
+  heroImage     String?
+  youtubeLink   String
+  instagramLink String
+  whatsappLink  String
+  linkedInLink  String
+  statsJson     String?
+  aiBoxesJson   String?
+}
+
+model Folder {
+  id        String   @id @default(cuid())
+  name      String
+  images    Image[]
+  videos    Video[]
+  createdAt DateTime @default(now())
+}
+
+model Image {
+  id        String   @id @default(cuid())
+  url       String
+  date      Float
+  folderId  String?
+  folder    Folder?  @relation(fields: [folderId], references: [id])
+}
+
+model Video {
+  id         String   @id @default(cuid())
+  youtubeUrl String
+  date       Float
+  folderId   String?
+  folder     Folder?  @relation(fields: [folderId], references: [id])
+}

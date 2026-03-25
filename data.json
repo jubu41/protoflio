@@ -1,0 +1,40 @@
+{
+  "aboutText": "Welcome to JB AI Creation. I am an AI Content Creator passionate about developing innovative, visually striking, and interactive digital experiences. Over the years, I've honed my skills in leveraging cutting-edge Artificial Intelligence tools to generate breathtaking images, dynamic videos, and captivating stories. My goal is to seamlessly blend algorithmic precision with creative intuition to deliver high-quality content that engages, inspires, and elevates brands. Explore my portfolio to see how AI can transform imagination into reality.",
+  "heroImage": "/uploads/hero_dc243bae-cd79-41c8-adbc-401930f698db.jpg",
+  "images": [
+    {
+      "id": "05687d23-c32e-47e3-9cf6-13938531856c",
+      "url": "/uploads/05687d23-c32e-47e3-9cf6-13938531856c.jpg",
+      "date": 1774316471959
+    },
+    {
+      "id": "9b8efcff-1c07-4fd9-80fb-17f2df6a041c",
+      "url": "/uploads/9b8efcff-1c07-4fd9-80fb-17f2df6a041c.jpg",
+      "date": 1774316860412,
+      "folderId": "a50650f0-da14-4a77-b17c-dcb7065ff2f2"
+    }
+  ],
+  "videos": [
+    {
+      "id": "66d1e3f5-d125-4b02-8211-d611e4123f12",
+      "youtubeUrl": "https://youtube.com/shorts/eQBhFZGG0UM?si=EgFPabXF_c7fIDE5",
+      "date": 1774320536002,
+      "folderId": "ffb8d47f-e4bc-4b21-82f6-253e26595dec"
+    }
+  ],
+  "folders": [
+    {
+      "id": "a50650f0-da14-4a77-b17c-dcb7065ff2f2",
+      "name": "jubu"
+    },
+    {
+      "id": "ffb8d47f-e4bc-4b21-82f6-253e26595dec",
+      "name": "jewlery"
+    }
+  ],
+  "youtubeLink": "http://www.youtube.com/@JBAi-j3b",
+  "instagramLink": "https://www.instagram.com/jb_creations6?utm_source=ig_web_button_share_sheet&igsh=ODdmZWVhMTFiMw==",
+  "adminPassword": "5445",
+  "whatsappLink": "https://wa.me/8129418544",
+  "linkedInLink": "https://www.linkedin.com/in/jubu-jubair-a54559393/?lipi=urn%3Ali%3Apage%3Ad_flagship3_profile_view_base_contact_details%3BwiqQNtx9TSyW%2FKsHklNsvw%3D%3D"
+}
