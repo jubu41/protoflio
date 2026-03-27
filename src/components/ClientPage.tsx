@@ -248,14 +248,18 @@ export default function ClientPage({ data }: Props) {
     }
   };
 
-  const parseMediaUrl = (url: string) => {
+  const parseMediaUrl = (rawUrl: string) => {
     try {
+        let url = rawUrl;
+        if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = 'https://' + url;
+        }
         const urlObj = new URL(url);
         if (urlObj.hostname.includes('instagram.com')) {
             const path = urlObj.pathname.replace(/\/$/, '');
             return {
                 type: 'instagram',
-                embedUrl: `https://www.instagram.com${path}/embed`,
+                embedUrl: `https://www.instagram.com${path}/embed/`,
                 badge: 'INSTAGRAM',
                 ratio: 'aspect-[4/5]',
                 color: 'bg-pink-500'
@@ -291,7 +295,9 @@ export default function ClientPage({ data }: Props) {
                 color: 'bg-purple-500'
             };
         }
-    } catch {}
+    } catch (e) {
+        console.error("URL Parse error:", e);
+    }
     return null;
   };
 
