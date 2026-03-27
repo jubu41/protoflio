@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { uploadImage, deleteImage, addVideo, deleteVideo, updateHeroImage, addFolder, deleteFolder, updateSocialLinks, setAdminPassword, updateAboutText, updateStats, updateAiBoxes } from "@/actions";
+import { uploadImage, deleteImage, addVideo, deleteVideo, updateHeroImage, addFolder, deleteFolder, updateSocialLinks, setAdminPassword, updateAboutText, updateStats, updateAiBoxes, updateFooter } from "@/actions";
 import type { DataStore } from "@/lib/data";
 import { Camera, Trash2, X, Plus, Upload, FolderPlus, FolderOpen, Video, Edit2, Check, Lock, Unlock, Key, Save } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -94,6 +94,24 @@ export default function ClientPage({ data }: Props) {
   const handleSaveAiBoxes = async () => {
     await updateAiBoxes(JSON.stringify(aiBoxesData));
     setIsEditingAiBoxes(false);
+  };
+
+  // Footer State
+  const [isEditingFooter, setIsEditingFooter] = useState(false);
+  const [footerData, setFooterData] = useState(() => {
+    if (data.footerJson) { try { return JSON.parse(data.footerJson); } catch {} }
+    return {
+      title: "Muhammed Jubair T",
+      desc: "Dedicated to creating visually striking, robust, and dynamic artificial intelligence digital experiences.",
+      subtitle: "JB Ai Creations",
+      address: "Mukkam (Vazhakkad), Kerala",
+      location: "Calicut, India"
+    };
+  });
+  
+  const handleSaveFooter = async () => {
+    await updateFooter(JSON.stringify(footerData));
+    setIsEditingFooter(false);
   };
 
   // Auth State
@@ -230,10 +248,51 @@ export default function ClientPage({ data }: Props) {
     }
   };
 
-  const getOutputVideoId = (url: string) => {
-    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=|shorts\/)([^#\&\?]*).*/;
-    const match = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : null;
+  const parseMediaUrl = (url: string) => {
+    try {
+        const urlObj = new URL(url);
+        if (urlObj.hostname.includes('instagram.com')) {
+            const path = urlObj.pathname.replace(/\/$/, '');
+            return {
+                type: 'instagram',
+                embedUrl: `https://www.instagram.com${path}/embed`,
+                badge: 'INSTAGRAM',
+                ratio: 'aspect-[4/5]',
+                color: 'bg-pink-500'
+            };
+        }
+        if (urlObj.hostname.includes('youtube.com') && urlObj.pathname === '/playlist' && urlObj.searchParams.has('list')) {
+            return {
+                type: 'playlist',
+                embedUrl: `https://www.youtube.com/embed/videoseries?list=${urlObj.searchParams.get('list')}`,
+                badge: 'PLAYLIST',
+                ratio: 'aspect-video',
+                color: 'bg-blue-500'
+            };
+        }
+        if (urlObj.pathname.includes('/shorts/')) {
+            const id = urlObj.pathname.split('/shorts/')[1].split('/')[0];
+            return {
+                type: 'shorts',
+                embedUrl: `https://www.youtube.com/embed/${id}?rel=0`,
+                badge: 'SHORTS',
+                ratio: 'aspect-[9/16]',
+                color: 'bg-red-500'
+            };
+        }
+        const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+        const match = url.match(regExp);
+        if (match && match[2].length === 11) {
+            return {
+                type: 'youtube',
+                embedUrl: `https://www.youtube.com/embed/${match[2]}?rel=0`,
+                badge: 'VIDEO',
+                ratio: 'aspect-video',
+                color: 'bg-purple-500'
+            };
+        }
+    } catch {}
+    return null;
   };
 
   const currentFolderImages = data.images.filter(img => img.folderId === activeImageFolderId || (!img.folderId && activeImageFolderId === "default"));
@@ -273,13 +332,14 @@ export default function ClientPage({ data }: Props) {
             </div>
             <div className="flex flex-wrap gap-2 relative">
                 {data.folders?.map(f => (
-                    <button 
+                    <motion.button 
+                        whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                         key={f.id}
                         onClick={() => setActive(f.id)}
                         className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors border ${active === f.id ? 'bg-white text-black border-white shadow-[0_0_15px_rgba(255,255,255,0.3)]' : 'bg-neutral-950 text-neutral-400 border-neutral-800 hover:border-neutral-500 hover:text-white'}`}
                     >
                         {f.name}
-                    </button>
+                    </motion.button>
                 ))}
             </div>
         </div>
@@ -553,24 +613,24 @@ export default function ClientPage({ data }: Props) {
                             {(data.youtubeLink || data.instagramLink || data.whatsappLink || data.linkedInLink) ? (
                                 <>
                                     {data.instagramLink && (
-                                        <a href={data.instagramLink} target="_blank" rel="noreferrer" className="block w-full py-5 px-6 bg-pink-600/10 hover:bg-pink-600/20 text-pink-100 border border-pink-500/30 rounded-2xl text-center font-semibold text-lg transition-colors shadow-sm">
+                                        <motion.a whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }} href={data.instagramLink} target="_blank" rel="noreferrer" className="block w-full py-5 px-6 bg-pink-600/10 hover:bg-pink-600/20 text-pink-100 border border-pink-500/30 rounded-2xl text-center font-semibold text-lg transition-all shadow-sm">
                                             Instagram
-                                        </a>
+                                        </motion.a>
                                     )}
                                     {data.youtubeLink && (
-                                        <a href={data.youtubeLink} target="_blank" rel="noreferrer" className="block w-full py-5 px-6 bg-red-600/10 hover:bg-red-600/20 text-red-100 border border-red-500/30 rounded-2xl text-center font-semibold text-lg transition-colors shadow-sm">
+                                        <motion.a whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }} href={data.youtubeLink} target="_blank" rel="noreferrer" className="block w-full py-5 px-6 bg-red-600/10 hover:bg-red-600/20 text-red-100 border border-red-500/30 rounded-2xl text-center font-semibold text-lg transition-all shadow-sm">
                                             YouTube
-                                        </a>
+                                        </motion.a>
                                     )}
                                     {data.linkedInLink && (
-                                        <a href={data.linkedInLink} target="_blank" rel="noreferrer" className="block w-full py-5 px-6 bg-blue-600/10 hover:bg-blue-600/20 text-blue-100 border border-blue-500/30 rounded-2xl text-center font-semibold text-lg transition-colors shadow-sm">
+                                        <motion.a whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }} href={data.linkedInLink} target="_blank" rel="noreferrer" className="block w-full py-5 px-6 bg-blue-600/10 hover:bg-blue-600/20 text-blue-100 border border-blue-500/30 rounded-2xl text-center font-semibold text-lg transition-all shadow-sm">
                                             LinkedIn
-                                        </a>
+                                        </motion.a>
                                     )}
                                     {data.whatsappLink && (
-                                        <a href={`https://wa.me/${data.whatsappLink.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="block w-full py-5 px-6 bg-green-600/10 hover:bg-green-600/20 text-green-100 border border-green-500/30 rounded-2xl text-center font-semibold text-lg transition-colors shadow-sm">
+                                        <motion.a whileHover={{ scale: 1.02, y: -2 }} whileTap={{ scale: 0.98 }} href={`https://wa.me/${data.whatsappLink.replace(/[^0-9]/g, '')}`} target="_blank" rel="noreferrer" className="block w-full py-5 px-6 bg-green-600/10 hover:bg-green-600/20 text-green-100 border border-green-500/30 rounded-2xl text-center font-semibold text-lg transition-all shadow-sm">
                                             WhatsApp Me
-                                        </a>
+                                        </motion.a>
                                     )}
                                 </>
                             ) : (
@@ -616,20 +676,22 @@ export default function ClientPage({ data }: Props) {
                             <p>No images in this folder.</p>
                         </div>
                     ) : (
-                        <div className="w-full grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <div className="w-full columns-2 md:columns-3 gap-4 space-y-4 pb-6">
                             <AnimatePresence>
                                 {currentFolderImages.map((img) => (
                                     <motion.div 
                                         layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} key={img.id} 
-                                        className="group relative aspect-square rounded-xl overflow-hidden bg-neutral-900 cursor-pointer border border-neutral-800"
+                                        whileHover={{ scale: 1.03, y: -4, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.8)" }}
+                                        transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                        className="group inline-block w-full relative rounded-2xl overflow-hidden bg-neutral-900 cursor-pointer border border-neutral-800 shadow-lg"
                                     >
                                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                                        <img src={img.url} alt="Generation" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110" onClick={() => setLightboxImage(img.url)} />
+                                        <img src={img.url} alt="Generation" className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105" onClick={() => setLightboxImage(img.url)} />
                                         
                                         {isAuthed && (
                                             <button 
                                                 onClick={(e) => { e.stopPropagation(); deleteImage(img.id); }}
-                                                className="absolute top-2 right-2 p-1.5 bg-black/60 text-white rounded-md opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-red-500 backdrop-blur-md"
+                                                className="absolute top-2 right-2 p-1.5 bg-black/60 text-white rounded-md opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-red-500 backdrop-blur-md z-10"
                                             >
                                                 <Trash2 size={14} />
                                             </button>
@@ -676,22 +738,32 @@ export default function ClientPage({ data }: Props) {
                             <p>No videos in this folder.</p>
                         </div>
                     ) : (
-                        <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="w-full columns-1 sm:columns-2 gap-4 space-y-4 pb-6">
                             <AnimatePresence>
                                 {currentFolderVideos.map((vid) => {
-                                    const ytId = getOutputVideoId(vid.youtubeUrl);
+                                    const parsed = parseMediaUrl(vid.youtubeUrl);
                                     return (
                                         <motion.div 
                                             layout initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} key={vid.id} 
-                                            className="group relative aspect-video rounded-xl overflow-hidden bg-neutral-900 border border-neutral-800"
+                                            whileHover={{ scale: 1.02, y: -4, boxShadow: "0 10px 30px -10px rgba(0,0,0,0.8)" }}
+                                            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+                                            className={`group inline-block w-full relative rounded-2xl overflow-hidden bg-neutral-900 border border-neutral-800 shadow-xl ${parsed?.ratio || 'aspect-video'}`}
                                         >
-                                            {ytId ? (
+                                            {/* Badge */}
+                                            {parsed && (
+                                                <div className="absolute top-3 left-3 z-10 px-2 py-1 bg-black/80 backdrop-blur-md rounded border border-white/10 flex items-center gap-1.5 text-[10px] uppercase font-bold text-white shadow-xl pointer-events-none tracking-widest">
+                                                    <div className={`w-2 h-2 rounded-full animate-pulse ${parsed.color}`} />
+                                                    {parsed.badge}
+                                                </div>
+                                            )}
+
+                                            {parsed ? (
                                                 <iframe 
-                                                    src={`https://www.youtube.com/embed/${ytId}?rel=0`} 
-                                                    title="YouTube video" 
+                                                    src={parsed.embedUrl} 
+                                                    title={`${parsed.badge} embed`} 
                                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                                                    allowFullScreen
-                                                    className="w-full h-full border-0 absolute inset-0"
+                                                    allowFullScreen={parsed.type !== 'instagram'}
+                                                    className="w-full h-full border-0 absolute inset-0 bg-neutral-950"
                                                 ></iframe>
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center p-4 text-center text-red-400 text-sm">
@@ -702,7 +774,7 @@ export default function ClientPage({ data }: Props) {
                                             {isAuthed && (
                                                 <button 
                                                     onClick={() => deleteVideo(vid.id)}
-                                                    className="absolute top-2 right-2 p-1.5 bg-black/60 text-white rounded-md opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity hover:bg-red-500 z-10 backdrop-blur-md"
+                                                    className="absolute top-3 right-3 p-2 bg-black/80 text-white rounded-md opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-all hover:bg-red-500 z-10 backdrop-blur-md border border-white/10 hover:border-red-500"
                                                 >
                                                     <Trash2 size={14} />
                                                 </button>
@@ -729,38 +801,38 @@ export default function ClientPage({ data }: Props) {
                 </button>
             )}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-2">
-                <div className="bg-neutral-900/60 border border-neutral-800 p-6 rounded-3xl text-center shadow-lg hover:bg-neutral-800/80 transition-colors">
+                <motion.div whileHover={{ scale: 1.05, y: -4 }} transition={{ type: "spring", stiffness: 300 }} className="bg-neutral-900/60 border border-neutral-800 p-6 rounded-3xl text-center shadow-lg transition-colors cursor-default">
                     {isEditingStats ? (
                         <input className="w-full text-center bg-neutral-950 border border-neutral-700 rounded p-1 text-2xl font-bold text-white mb-2" value={statsData.views} onChange={e => setStatsData({...statsData, views: e.target.value})} />
                     ) : (
                         <h4 className="text-4xl font-extrabold text-white mb-2">{statsData.views}</h4>
                     )}
                     <p className="text-neutral-400 text-sm uppercase tracking-wider font-semibold">Total Views</p>
-                </div>
-                <div className="bg-neutral-900/60 border border-neutral-800 p-6 rounded-3xl text-center shadow-lg hover:bg-neutral-800/80 transition-colors">
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05, y: -4 }} transition={{ type: "spring", stiffness: 300 }} className="bg-neutral-900/60 border border-neutral-800 p-6 rounded-3xl text-center shadow-lg transition-colors cursor-default">
                     {isEditingStats ? (
                         <input className="w-full text-center bg-neutral-950 border border-neutral-700 rounded p-1 text-2xl font-bold text-white mb-2" value={statsData.works} onChange={e => setStatsData({...statsData, works: e.target.value})} />
                     ) : (
                         <h4 className="text-4xl font-extrabold text-white mb-2">{statsData.works}</h4>
                     )}
                     <p className="text-neutral-400 text-sm uppercase tracking-wider font-semibold">Total Works</p>
-                </div>
-                <div className="bg-neutral-900/60 border border-neutral-800 p-6 rounded-3xl text-center shadow-lg hover:bg-neutral-800/80 transition-colors">
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05, y: -4 }} transition={{ type: "spring", stiffness: 300 }} className="bg-neutral-900/60 border border-neutral-800 p-6 rounded-3xl text-center shadow-lg transition-colors cursor-default">
                     {isEditingStats ? (
                         <input className="w-full text-center bg-neutral-950 border border-neutral-700 rounded p-1 text-2xl font-bold text-white mb-2" value={statsData.subs} onChange={e => setStatsData({...statsData, subs: e.target.value})} />
                     ) : (
                         <h4 className="text-4xl font-extrabold text-white mb-2">{statsData.subs}</h4>
                     )}
                     <p className="text-neutral-400 text-sm uppercase tracking-wider font-semibold">Subscribers</p>
-                </div>
-                <div className="bg-neutral-900/60 border border-neutral-800 p-6 rounded-3xl text-center shadow-lg hover:bg-neutral-800/80 transition-colors">
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05, y: -4 }} transition={{ type: "spring", stiffness: 300 }} className="bg-neutral-900/60 border border-neutral-800 p-6 rounded-3xl text-center shadow-lg transition-colors cursor-default">
                     {isEditingStats ? (
                         <input className="w-full text-center bg-neutral-950 border border-neutral-700 rounded p-1 text-2xl font-bold text-white mb-2" value={statsData.clients} onChange={e => setStatsData({...statsData, clients: e.target.value})} />
                     ) : (
                         <h4 className="text-4xl font-extrabold text-white mb-2">{statsData.clients}</h4>
                     )}
                     <p className="text-neutral-400 text-sm uppercase tracking-wider font-semibold">Happy Clients</p>
-                </div>
+                </motion.div>
             </div>
         </div>
 
@@ -777,7 +849,7 @@ export default function ClientPage({ data }: Props) {
             )}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-2">
                 {aiBoxesData.map((box: any, i: number) => (
-                    <div key={i} className="bg-neutral-900/40 border border-neutral-800/50 p-8 rounded-3xl hover:-translate-y-2 transition-transform duration-300">
+                    <motion.div whileHover={{ scale: 1.03, y: -5 }} transition={{ type: "spring", stiffness: 300 }} key={i} className="bg-neutral-900/40 border border-neutral-800/50 p-8 rounded-3xl shadow-lg cursor-default">
                         {isEditingAiBoxes ? (
                             <>
                                 <input 
@@ -797,7 +869,7 @@ export default function ClientPage({ data }: Props) {
                                 <p className="text-neutral-400 text-sm leading-relaxed whitespace-pre-line">{box.desc}</p>
                             </>
                         )}
-                    </div>
+                    </motion.div>
                 ))}
             </div>
         </div>
@@ -806,29 +878,61 @@ export default function ClientPage({ data }: Props) {
 
       {/* Footer */}
       <footer className="w-full border-t border-white/10 bg-neutral-950 mt-10 p-8 relative z-10 bottom-0 left-0 right-0">
-          <div className="max-w-4xl mx-auto flex flex-col md:flex-row justify-between gap-10 md:items-start text-center md:text-left">
-              <div className="flex-1">
-                  <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-white bg-clip-text text-transparent mb-2">Muhammed Jubair T</h3>
-                  <p className="text-neutral-400 text-sm leading-relaxed mb-4">Dedicated to creating visually striking, robust, and dynamic artificial intelligence digital experiences.</p>
-                  <p className="font-semibold text-white">JB Ai Creations</p>
-              </div>
-              <div className="space-y-4 text-sm text-neutral-300 md:w-72 mt-4 md:mt-0">
-                  <div className="flex justify-between items-center gap-4 border-b border-neutral-800 pb-3">
-                     <span className="font-semibold text-neutral-500 uppercase tracking-widest text-[10px]">Address</span> 
-                     <span className="text-right">Mukkam (Vazhakkad), Kerala</span>
-                  </div>
-                  <div className="flex justify-between items-center gap-4 border-b border-neutral-800 pb-3">
-                     <span className="font-semibold text-neutral-500 uppercase tracking-widest text-[10px]">Phone</span> 
-                     <span className="text-right">{data.whatsappLink ? `+91 ${data.whatsappLink.replace('+91', '')}` : 'Not provided'}</span>
-                  </div>
-                  <div className="flex justify-between items-center gap-4 pb-3">
-                     <span className="font-semibold text-neutral-500 uppercase tracking-widest text-[10px]">Location</span> 
-                     <span className="text-right">Calicut, India</span>
-                  </div>
-              </div>
+          <div className="max-w-4xl mx-auto relative">
+             {isAuthed && (
+                 <button 
+                     onClick={() => isEditingFooter ? handleSaveFooter() : setIsEditingFooter(true)}
+                     className="absolute -top-4 right-0 z-20 flex items-center gap-2 text-sm bg-neutral-900 hover:bg-neutral-800 px-3 py-1.5 rounded-lg border border-neutral-800 transition-colors"
+                 >
+                     {isEditingFooter ? <><Check size={14}/> Save Footer</> : <><Edit2 size={14}/> Edit Footer</>}
+                 </button>
+             )}
+             
+             {isEditingFooter ? (
+                <div className="flex flex-col md:flex-row justify-between gap-10 bg-neutral-900/50 p-6 rounded-2xl border border-neutral-800 pt-10">
+                    <div className="flex-1 space-y-3">
+                        <input className="w-full bg-neutral-950 border border-neutral-700 rounded p-2 text-xl font-bold text-white outline-none focus:border-purple-500" value={footerData.title} onChange={e => setFooterData({...footerData, title: e.target.value})} placeholder="Title (e.g., Muhammed Jubair T)" />
+                        <textarea className="w-full bg-neutral-950 border border-neutral-700 rounded p-2 text-sm text-neutral-300 outline-none focus:border-purple-500 h-20 resize-none" value={footerData.desc} onChange={e => setFooterData({...footerData, desc: e.target.value})} placeholder="Description" />
+                        <input className="w-full bg-neutral-950 border border-neutral-700 rounded p-2 font-semibold text-white outline-none focus:border-purple-500" value={footerData.subtitle} onChange={e => setFooterData({...footerData, subtitle: e.target.value})} placeholder="Subtitle (e.g., JB Ai Creations)" />
+                    </div>
+                    <div className="space-y-4 md:w-72 mt-4 md:mt-0">
+                        <div>
+                            <span className="font-semibold text-neutral-500 uppercase tracking-widest text-[10px] block mb-1">Address</span> 
+                            <input className="w-full bg-neutral-950 border border-neutral-700 rounded p-2 text-sm text-right text-white outline-none focus:border-purple-500" value={footerData.address} onChange={e => setFooterData({...footerData, address: e.target.value})} placeholder="Address" />
+                        </div>
+                        <div>
+                            <span className="font-semibold text-neutral-500 uppercase tracking-widest text-[10px] block mb-1">Location</span> 
+                            <input className="w-full bg-neutral-950 border border-neutral-700 rounded p-2 text-sm text-right text-white outline-none focus:border-purple-500" value={footerData.location} onChange={e => setFooterData({...footerData, location: e.target.value})} placeholder="Location" />
+                        </div>
+                        <div className="text-xs text-neutral-500 text-right mt-2 italic">Phone number is updated via the "Socials" tab (WhatsApp Number).</div>
+                    </div>
+                </div>
+             ) : (
+                <div className="flex flex-col md:flex-row justify-between gap-10 md:items-start text-center md:text-left pt-6">
+                    <div className="flex-1">
+                        <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-white bg-clip-text text-transparent mb-2">{footerData.title}</h3>
+                        <p className="text-neutral-400 text-sm leading-relaxed mb-4">{footerData.desc}</p>
+                        <p className="font-semibold text-white">{footerData.subtitle}</p>
+                    </div>
+                    <div className="space-y-4 text-sm text-neutral-300 md:w-72 mt-4 md:mt-0">
+                        <div className="flex justify-between items-center gap-4 border-b border-neutral-800 pb-3">
+                           <span className="font-semibold text-neutral-500 uppercase tracking-widest text-[10px]">Address</span> 
+                           <span className="text-right">{footerData.address}</span>
+                        </div>
+                        <div className="flex justify-between items-center gap-4 border-b border-neutral-800 pb-3">
+                           <span className="font-semibold text-neutral-500 uppercase tracking-widest text-[10px]">Phone</span> 
+                           <span className="text-right">{data.whatsappLink ? `+91 ${data.whatsappLink.replace('+91', '')}` : 'Not provided'}</span>
+                        </div>
+                        <div className="flex justify-between items-center gap-4 pb-3">
+                           <span className="font-semibold text-neutral-500 uppercase tracking-widest text-[10px]">Location</span> 
+                           <span className="text-right">{footerData.location}</span>
+                        </div>
+                    </div>
+                </div>
+             )}
           </div>
           <div className="max-w-4xl mx-auto mt-12 pt-6 border-t border-white/5 text-center text-xs text-neutral-600 flex flex-col md:flex-row justify-between items-center gap-2">
-              <span>© {new Date().getFullYear()} JB Ai Creations.</span>
+              <span>© {new Date().getFullYear()} {footerData.subtitle}.</span>
               <span>All rights reserved. Designed with precision.</span>
           </div>
       </footer>

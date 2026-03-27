@@ -10,6 +10,7 @@ export interface DataStore {
   adminPassword: string | null;
   statsJson: string | null;
   aiBoxesJson: string | null;
+  footerJson: string | null;
   images: Array<{ id: string; url: string; date: number; folderId?: string }>;
   folders: Array<{ id: string; name: string; createdAt?: Date }>;
   videos: Array<{ id: string; youtubeUrl: string; date: number; folderId?: string }>;
@@ -56,6 +57,7 @@ export async function getData(): Promise<DataStore> {
     linkedInLink: userData.linkedInLink,
     statsJson: userData.statsJson,
     aiBoxesJson: userData.aiBoxesJson,
+    footerJson: userData.footerJson,
     adminPassword: admin?.password || null, // hashed, ClientPage uses it but wait, we need real auth. The client checks passwordInput === data.adminPassword...
     images: images.map(img => ({ id: img.id, url: img.url, date: img.date, folderId: img.folderId || undefined })),
     videos: videos.map(vid => ({ id: vid.id, youtubeUrl: vid.youtubeUrl, date: vid.date, folderId: vid.folderId || undefined })),

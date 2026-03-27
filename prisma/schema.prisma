@@ -24,6 +24,7 @@ model UserData {
   linkedInLink  String
   statsJson     String?
   aiBoxesJson   String?
+  footerJson    String?
 }
 
 model Folder {

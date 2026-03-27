@@ -215,3 +215,10 @@ export async function updateAiBoxes(aiBoxesJson: string) {
   revalidatePath('/');
   return { success: true };
 }
+
+export async function updateFooter(footerJson: string) {
+  let user = await prisma.userData.findFirst();
+  if (user) await prisma.userData.update({ where: { id: user.id }, data: { footerJson } });
+  revalidatePath('/');
+  return { success: true };
+}
