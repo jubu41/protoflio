@@ -12,7 +12,7 @@ export interface DataStore {
   aiBoxesJson: string | null;
   footerJson: string | null;
   images: Array<{ id: string; url: string; date: number; folderId?: string }>;
-  folders: Array<{ id: string; name: string; createdAt?: Date }>;
+  folders: Array<{ id: string; name: string; type?: string; createdAt?: Date }>;
   videos: Array<{ id: string; youtubeUrl: string; date: number; folderId?: string }>;
 }
 
@@ -44,8 +44,24 @@ export async function getData(): Promise<DataStore> {
 
   // Add default folder
   let mappedFolders = [
-    { id: "default", name: "All Items" },
-    ...folders.map(f => ({ id: f.id, name: f.name, createdAt: f.createdAt }))
+    { id: "default", name: "All Items", type: "both" },
+    ...folders.map(f => {
+      let type = "image";
+      let name = f.name;
+      if (name.startsWith("video::")) {
+        type = "video";
+        name = name.replace("video::", "");
+      } else if (name.startsWith("image::")) {
+        type = "image";
+        name = name.replace("image::", "");
+      } else {
+         const hasVideos = videos.some(v => v.folderId === f.id);
+         const hasImages = images.some(i => i.folderId === f.id);
+         if (hasVideos && !hasImages) type = "video";
+         else type = "image";
+      }
+      return { id: f.id, name, type, createdAt: f.createdAt };
+    })
   ];
 
   return {

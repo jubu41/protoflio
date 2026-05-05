@@ -128,10 +128,10 @@ export async function updateHeroImage(formData: FormData) {
   }
 }
 
-export async function addFolder(name: string) {
+export async function addFolder(name: string, type: "image" | "video" = "image") {
   if (!name.trim()) return { error: "Name is required" };
   const newFolder = await prisma.folder.create({
-    data: { name: name.trim() }
+    data: { name: `${type}::${name.trim()}` }
   });
   revalidatePath("/");
   return { success: true, folder: newFolder };

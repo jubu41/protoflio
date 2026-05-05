@@ -175,7 +175,7 @@ export default function ClientPage({ data }: Props) {
   const handleCreateFolder = async (e: React.FormEvent, type: "image" | "video") => {
     e.preventDefault();
     if (!isAuthed || !newFolderName.trim()) return;
-    const res = await addFolder(newFolderName);
+    const res = await addFolder(newFolderName, type);
     if (!res.error && res.folder) {
         if (type === "image") setActiveImageFolderId(res.folder.id);
         if (type === "video") setActiveVideoFolderId(res.folder.id);
@@ -337,7 +337,7 @@ export default function ClientPage({ data }: Props) {
                 )}
             </div>
             <div className="flex flex-wrap gap-2 relative">
-                {data.folders?.map(f => (
+                {data.folders?.filter(f => f.type === type || f.type === "both").map(f => (
                     <motion.button 
                         whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}
                         key={f.id}
@@ -797,83 +797,102 @@ export default function ClientPage({ data }: Props) {
         </AnimatePresence>
 
         {/* Stats Section */}
-        <div className="mt-20 pt-10 border-t border-white/10 w-full mb-10 overflow-hidden relative">
+        <div className="mt-24 pt-12 border-t border-white/5 w-full mb-16 overflow-hidden relative">
             {isAuthed && (
                 <button 
                     onClick={() => isEditingStats ? handleSaveStats() : setIsEditingStats(true)}
-                    className="absolute top-2 right-2 z-20 flex items-center gap-2 text-sm bg-neutral-900 hover:bg-neutral-800 px-3 py-1.5 rounded-lg border border-neutral-800 transition-colors"
+                    className="absolute top-2 right-2 z-20 flex items-center gap-2 text-sm bg-neutral-900 hover:bg-neutral-800 px-3 py-1.5 rounded-lg border border-neutral-800 transition-colors shadow-lg"
                 >
                     {isEditingStats ? <><Check size={14}/> Save</> : <><Edit2 size={14}/> Edit</>}
                 </button>
             )}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 px-2">
-                <motion.div whileHover={{ scale: 1.05, y: -4 }} transition={{ type: "spring", stiffness: 300 }} className="bg-neutral-900/60 border border-neutral-800 p-6 rounded-3xl text-center shadow-lg transition-colors cursor-default">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6 px-2">
+                <motion.div whileHover={{ y: -6 }} className="bg-gradient-to-b from-neutral-900/80 to-neutral-900/30 border border-neutral-800/60 p-6 rounded-3xl text-center shadow-xl transition-all relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                     {isEditingStats ? (
-                        <input className="w-full text-center bg-neutral-950 border border-neutral-700 rounded p-1 text-2xl font-bold text-white mb-2" value={statsData.views} onChange={e => setStatsData({...statsData, views: e.target.value})} />
+                        <input className="w-full text-center bg-neutral-950 border border-neutral-700 rounded p-1 text-3xl font-black tracking-tight text-white mb-2 relative z-10 outline-none focus:border-purple-500" value={statsData.views} onChange={e => setStatsData({...statsData, views: e.target.value})} />
                     ) : (
-                        <h4 className="text-4xl font-extrabold text-white mb-2">{statsData.views}</h4>
+                        <h4 className="text-3xl lg:text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white to-neutral-400 mb-2 relative z-10">{statsData.views}</h4>
                     )}
-                    <p className="text-neutral-400 text-sm uppercase tracking-wider font-semibold">Total Views</p>
+                    <p className="text-neutral-500 text-[11px] lg:text-xs uppercase tracking-[0.2em] font-bold relative z-10">Total Views</p>
                 </motion.div>
-                <motion.div whileHover={{ scale: 1.05, y: -4 }} transition={{ type: "spring", stiffness: 300 }} className="bg-neutral-900/60 border border-neutral-800 p-6 rounded-3xl text-center shadow-lg transition-colors cursor-default">
+                <motion.div whileHover={{ y: -6 }} className="bg-gradient-to-b from-neutral-900/80 to-neutral-900/30 border border-neutral-800/60 p-6 rounded-3xl text-center shadow-xl transition-all relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                     {isEditingStats ? (
-                        <input className="w-full text-center bg-neutral-950 border border-neutral-700 rounded p-1 text-2xl font-bold text-white mb-2" value={statsData.works} onChange={e => setStatsData({...statsData, works: e.target.value})} />
+                        <input className="w-full text-center bg-neutral-950 border border-neutral-700 rounded p-1 text-3xl font-black tracking-tight text-white mb-2 relative z-10 outline-none focus:border-blue-500" value={statsData.works} onChange={e => setStatsData({...statsData, works: e.target.value})} />
                     ) : (
-                        <h4 className="text-4xl font-extrabold text-white mb-2">{statsData.works}</h4>
+                        <h4 className="text-3xl lg:text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white to-neutral-400 mb-2 relative z-10">{statsData.works}</h4>
                     )}
-                    <p className="text-neutral-400 text-sm uppercase tracking-wider font-semibold">Total Works</p>
+                    <p className="text-neutral-500 text-[11px] lg:text-xs uppercase tracking-[0.2em] font-bold relative z-10">Total Works</p>
                 </motion.div>
-                <motion.div whileHover={{ scale: 1.05, y: -4 }} transition={{ type: "spring", stiffness: 300 }} className="bg-neutral-900/60 border border-neutral-800 p-6 rounded-3xl text-center shadow-lg transition-colors cursor-default">
+                <motion.div whileHover={{ y: -6 }} className="bg-gradient-to-b from-neutral-900/80 to-neutral-900/30 border border-neutral-800/60 p-6 rounded-3xl text-center shadow-xl transition-all relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                     {isEditingStats ? (
-                        <input className="w-full text-center bg-neutral-950 border border-neutral-700 rounded p-1 text-2xl font-bold text-white mb-2" value={statsData.subs} onChange={e => setStatsData({...statsData, subs: e.target.value})} />
+                        <input className="w-full text-center bg-neutral-950 border border-neutral-700 rounded p-1 text-3xl font-black tracking-tight text-white mb-2 relative z-10 outline-none focus:border-green-500" value={statsData.subs} onChange={e => setStatsData({...statsData, subs: e.target.value})} />
                     ) : (
-                        <h4 className="text-4xl font-extrabold text-white mb-2">{statsData.subs}</h4>
+                        <h4 className="text-3xl lg:text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white to-neutral-400 mb-2 relative z-10">{statsData.subs}</h4>
                     )}
-                    <p className="text-neutral-400 text-sm uppercase tracking-wider font-semibold">Subscribers</p>
+                    <p className="text-neutral-500 text-[11px] lg:text-xs uppercase tracking-[0.2em] font-bold relative z-10">Subscribers</p>
                 </motion.div>
-                <motion.div whileHover={{ scale: 1.05, y: -4 }} transition={{ type: "spring", stiffness: 300 }} className="bg-neutral-900/60 border border-neutral-800 p-6 rounded-3xl text-center shadow-lg transition-colors cursor-default">
+                <motion.div whileHover={{ y: -6 }} className="bg-gradient-to-b from-neutral-900/80 to-neutral-900/30 border border-neutral-800/60 p-6 rounded-3xl text-center shadow-xl transition-all relative overflow-hidden group">
+                    <div className="absolute inset-0 bg-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                     {isEditingStats ? (
-                        <input className="w-full text-center bg-neutral-950 border border-neutral-700 rounded p-1 text-2xl font-bold text-white mb-2" value={statsData.clients} onChange={e => setStatsData({...statsData, clients: e.target.value})} />
+                        <input className="w-full text-center bg-neutral-950 border border-neutral-700 rounded p-1 text-3xl font-black tracking-tight text-white mb-2 relative z-10 outline-none focus:border-pink-500" value={statsData.clients} onChange={e => setStatsData({...statsData, clients: e.target.value})} />
                     ) : (
-                        <h4 className="text-4xl font-extrabold text-white mb-2">{statsData.clients}</h4>
+                        <h4 className="text-3xl lg:text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white to-neutral-400 mb-2 relative z-10">{statsData.clients}</h4>
                     )}
-                    <p className="text-neutral-400 text-sm uppercase tracking-wider font-semibold">Happy Clients</p>
+                    <p className="text-neutral-500 text-[11px] lg:text-xs uppercase tracking-[0.2em] font-bold relative z-10">Happy Clients</p>
                 </motion.div>
             </div>
         </div>
 
-        {/* Why AI Video Section */}
-        <div className="mt-10 mb-20 w-full relative">
-            <h3 className="text-2xl font-bold mb-8 flex justify-center text-center"><span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Power of AI Content</span></h3>
+        <div className="mt-16 mb-24 w-full relative">
+            <div className="flex flex-col items-center mb-12">
+                <span className="text-purple-500 font-bold tracking-widest uppercase text-xs mb-2">Expertise</span>
+                <h3 className="text-3xl md:text-4xl font-black text-center"><span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">Power of AI Content</span></h3>
+            </div>
+            
             {isAuthed && (
                 <button 
                     onClick={() => isEditingAiBoxes ? handleSaveAiBoxes() : setIsEditingAiBoxes(true)}
-                    className="absolute top-0 right-2 z-20 flex items-center gap-2 text-sm bg-neutral-900 hover:bg-neutral-800 px-3 py-1.5 rounded-lg border border-neutral-800 transition-colors"
+                    className="absolute top-0 right-2 z-20 flex items-center gap-2 text-sm bg-neutral-900 hover:bg-neutral-800 px-3 py-1.5 rounded-lg border border-neutral-800 transition-colors shadow-lg"
                 >
                     {isEditingAiBoxes ? <><Check size={14}/> Save</> : <><Edit2 size={14}/> Edit</>}
                 </button>
             )}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-2">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 px-2 items-start">
                 {aiBoxesData.map((box: any, i: number) => (
-                    <motion.div whileHover={{ scale: 1.03, y: -5 }} transition={{ type: "spring", stiffness: 300 }} key={i} className="bg-neutral-900/40 border border-neutral-800/50 p-8 rounded-3xl shadow-lg cursor-default">
+                    <motion.div 
+                        whileHover={{ y: -8 }} 
+                        transition={{ type: "spring", stiffness: 400, damping: 25 }} 
+                        key={i} 
+                        className="bg-neutral-900/40 backdrop-blur-sm border border-neutral-800 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden group hover:border-neutral-700 transition-colors"
+                    >
+                        {/* Decorative background element */}
+                        <div className="absolute -right-8 -top-8 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition-colors" />
+                        
+                        <div className="mb-6 h-12 w-12 rounded-2xl bg-gradient-to-br from-purple-500/20 to-blue-500/20 flex items-center justify-center border border-white/5 relative z-10">
+                            <span className="text-xl font-bold bg-gradient-to-br from-purple-400 to-blue-400 bg-clip-text text-transparent">0{i+1}</span>
+                        </div>
+                        
                         {isEditingAiBoxes ? (
-                            <>
+                            <div className="relative z-10 space-y-4">
                                 <input 
-                                    className="w-full bg-neutral-950 border border-neutral-700 rounded p-2 text-lg font-bold text-white mb-3" 
+                                    className="w-full bg-neutral-950 border border-neutral-700 rounded-xl p-3 text-lg font-bold text-white outline-none focus:border-purple-500 transition-colors" 
                                     value={box.title} 
                                     onChange={(e) => { const nd = [...aiBoxesData]; nd[i].title = e.target.value; setAiBoxesData(nd); }} 
                                 />
                                 <textarea 
-                                    className="w-full bg-neutral-950 border border-neutral-700 rounded p-2 text-sm text-neutral-300 min-h-[120px] resize-none" 
+                                    className="w-full bg-neutral-950 border border-neutral-700 rounded-xl p-3 text-sm text-neutral-300 min-h-[140px] resize-none outline-none focus:border-purple-500 transition-colors" 
                                     value={box.desc} 
                                     onChange={(e) => { const nd = [...aiBoxesData]; nd[i].desc = e.target.value; setAiBoxesData(nd); }} 
                                 />
-                            </>
+                            </div>
                         ) : (
-                            <>
-                                <h4 className="text-lg font-bold text-white mb-3">{box.title}</h4>
-                                <p className="text-neutral-400 text-sm leading-relaxed whitespace-pre-line">{box.desc}</p>
-                            </>
+                            <div className="relative z-10">
+                                <h4 className="text-xl font-bold text-white mb-4 tracking-tight">{box.title}</h4>
+                                <p className="text-neutral-400 text-sm leading-relaxed whitespace-pre-line group-hover:text-neutral-300 transition-colors">{box.desc}</p>
+                            </div>
                         )}
                     </motion.div>
                 ))}
