@@ -196,14 +196,24 @@ export default function ClientPage({ data }: Props) {
     if (!isAuthed) return;
     if (e.target.files && e.target.files.length > 0) {
       setLoadingImages(true);
+      let hasError = false;
       for (let i = 0; i < e.target.files.length; i++) {
         const formData = new FormData();
         formData.append("file", e.target.files[i]);
         formData.append("folderId", activeImageFolderId);
-        await uploadImage(formData);
+        const result = await uploadImage(formData);
+        if (result?.error) {
+          alert("Upload failed: " + result.error);
+          hasError = true;
+          break;
+        }
       }
       setLoadingImages(false);
       if (addImageRef.current) addImageRef.current.value = "";
+      if (!hasError) {
+        // Reload page to show newly uploaded images
+        window.location.reload();
+      }
     }
   };
 
