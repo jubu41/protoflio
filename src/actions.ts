@@ -18,6 +18,15 @@ export async function uploadImage(formData: FormData) {
   const folderId = formData.get("folderId") as string | null;
   if (!file) return { error: "No file provided" };
 
+  // Check if Cloudinary is configured
+  const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+  
+  if (!cloudName || !apiKey || !apiSecret) {
+    return { error: `Cloudinary not configured. Missing: ${!cloudName ? 'CLOUD_NAME ' : ''}${!apiKey ? 'API_KEY ' : ''}${!apiSecret ? 'API_SECRET' : ''}` };
+  }
+
   const bytes = await file.arrayBuffer();
   const buffer = Buffer.from(bytes);
   const fileBase64 = `data:${file.type};base64,${buffer.toString("base64")}`;
@@ -37,9 +46,10 @@ export async function uploadImage(formData: FormData) {
 
     revalidatePath("/");
     return { success: true, image: newImage };
-  } catch (error) {
-    console.error("Upload error", error);
-    return { error: "Upload failed" };
+  } catch (error: any) {
+    const msg = error?.message || error?.error?.message || JSON.stringify(error);
+    console.error("Cloudinary Upload Error:", msg);
+    return { error: msg };
   }
 }
 
