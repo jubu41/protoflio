@@ -900,9 +900,7 @@ export default function ClientPage({ data }: Props) {
                 ))}
             </div>
         </div>
-        </div>
       </div>
-
       {/* Footer */}
       <footer className="w-full border-t border-white/10 bg-neutral-950 mt-10 p-8 relative z-10 bottom-0 left-0 right-0">
           <div className="max-w-4xl mx-auto relative">
