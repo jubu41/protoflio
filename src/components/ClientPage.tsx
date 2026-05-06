@@ -795,9 +795,11 @@ export default function ClientPage({ data }: Props) {
             )}
 
         </AnimatePresence>
+      </div> {/* End max-w-2xl container */}
 
+      <div className="relative z-10 max-w-7xl mx-auto px-6">
         {/* Stats Section */}
-        <div className="mt-24 pt-12 border-t border-white/5 w-full mb-16 overflow-hidden relative">
+        <div className="mt-16 pt-12 border-t border-white/5 w-full mb-16 overflow-hidden relative">
             {isAuthed && (
                 <button 
                     onClick={() => isEditingStats ? handleSaveStats() : setIsEditingStats(true)}
@@ -807,41 +809,41 @@ export default function ClientPage({ data }: Props) {
                 </button>
             )}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6 px-2">
-                <motion.div whileHover={{ y: -6 }} className="bg-gradient-to-b from-neutral-900/80 to-neutral-900/30 border border-neutral-800/60 p-6 rounded-3xl text-center shadow-xl transition-all relative overflow-hidden group">
+                <motion.div whileHover={{ y: -6 }} className="bg-neutral-900/30 p-8 rounded-[2rem] text-center transition-all relative overflow-hidden group">
                     <div className="absolute inset-0 bg-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                     {isEditingStats ? (
-                        <input className="w-full text-center bg-neutral-950 border border-neutral-700 rounded p-1 text-3xl font-black tracking-tight text-white mb-2 relative z-10 outline-none focus:border-purple-500" value={statsData.views} onChange={e => setStatsData({...statsData, views: e.target.value})} />
+                        <input className="w-full text-center bg-transparent border-b border-neutral-700 p-1 text-4xl font-bold tracking-tight text-white mb-2 relative z-10 outline-none focus:border-purple-500" value={statsData.views} onChange={e => setStatsData({...statsData, views: e.target.value})} />
                     ) : (
-                        <h4 className="text-3xl lg:text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white to-neutral-400 mb-2 relative z-10">{statsData.views}</h4>
+                        <h4 className="text-4xl lg:text-5xl font-bold tracking-tight text-white mb-2 relative z-10">{statsData.views}</h4>
                     )}
-                    <p className="text-neutral-500 text-[11px] lg:text-xs uppercase tracking-[0.2em] font-bold relative z-10">Total Views</p>
+                    <p className="text-neutral-400 text-xs uppercase tracking-[0.2em] font-semibold relative z-10">Total Views</p>
                 </motion.div>
-                <motion.div whileHover={{ y: -6 }} className="bg-gradient-to-b from-neutral-900/80 to-neutral-900/30 border border-neutral-800/60 p-6 rounded-3xl text-center shadow-xl transition-all relative overflow-hidden group">
+                <motion.div whileHover={{ y: -6 }} className="bg-neutral-900/30 p-8 rounded-[2rem] text-center transition-all relative overflow-hidden group">
                     <div className="absolute inset-0 bg-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                     {isEditingStats ? (
-                        <input className="w-full text-center bg-neutral-950 border border-neutral-700 rounded p-1 text-3xl font-black tracking-tight text-white mb-2 relative z-10 outline-none focus:border-blue-500" value={statsData.works} onChange={e => setStatsData({...statsData, works: e.target.value})} />
+                        <input className="w-full text-center bg-transparent border-b border-neutral-700 p-1 text-4xl font-bold tracking-tight text-white mb-2 relative z-10 outline-none focus:border-blue-500" value={statsData.works} onChange={e => setStatsData({...statsData, works: e.target.value})} />
                     ) : (
-                        <h4 className="text-3xl lg:text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white to-neutral-400 mb-2 relative z-10">{statsData.works}</h4>
+                        <h4 className="text-4xl lg:text-5xl font-bold tracking-tight text-white mb-2 relative z-10">{statsData.works}</h4>
                     )}
-                    <p className="text-neutral-500 text-[11px] lg:text-xs uppercase tracking-[0.2em] font-bold relative z-10">Total Works</p>
+                    <p className="text-neutral-400 text-xs uppercase tracking-[0.2em] font-semibold relative z-10">Total Works</p>
                 </motion.div>
-                <motion.div whileHover={{ y: -6 }} className="bg-gradient-to-b from-neutral-900/80 to-neutral-900/30 border border-neutral-800/60 p-6 rounded-3xl text-center shadow-xl transition-all relative overflow-hidden group">
+                <motion.div whileHover={{ y: -6 }} className="bg-neutral-900/30 p-8 rounded-[2rem] text-center transition-all relative overflow-hidden group">
                     <div className="absolute inset-0 bg-green-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                     {isEditingStats ? (
-                        <input className="w-full text-center bg-neutral-950 border border-neutral-700 rounded p-1 text-3xl font-black tracking-tight text-white mb-2 relative z-10 outline-none focus:border-green-500" value={statsData.subs} onChange={e => setStatsData({...statsData, subs: e.target.value})} />
+                        <input className="w-full text-center bg-transparent border-b border-neutral-700 p-1 text-4xl font-bold tracking-tight text-white mb-2 relative z-10 outline-none focus:border-green-500" value={statsData.subs} onChange={e => setStatsData({...statsData, subs: e.target.value})} />
                     ) : (
-                        <h4 className="text-3xl lg:text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white to-neutral-400 mb-2 relative z-10">{statsData.subs}</h4>
+                        <h4 className="text-4xl lg:text-5xl font-bold tracking-tight text-white mb-2 relative z-10">{statsData.subs}</h4>
                     )}
-                    <p className="text-neutral-500 text-[11px] lg:text-xs uppercase tracking-[0.2em] font-bold relative z-10">Subscribers</p>
+                    <p className="text-neutral-400 text-xs uppercase tracking-[0.2em] font-semibold relative z-10">Subscribers</p>
                 </motion.div>
-                <motion.div whileHover={{ y: -6 }} className="bg-gradient-to-b from-neutral-900/80 to-neutral-900/30 border border-neutral-800/60 p-6 rounded-3xl text-center shadow-xl transition-all relative overflow-hidden group">
+                <motion.div whileHover={{ y: -6 }} className="bg-neutral-900/30 p-8 rounded-[2rem] text-center transition-all relative overflow-hidden group">
                     <div className="absolute inset-0 bg-pink-500/5 opacity-0 group-hover:opacity-100 transition-opacity" />
                     {isEditingStats ? (
-                        <input className="w-full text-center bg-neutral-950 border border-neutral-700 rounded p-1 text-3xl font-black tracking-tight text-white mb-2 relative z-10 outline-none focus:border-pink-500" value={statsData.clients} onChange={e => setStatsData({...statsData, clients: e.target.value})} />
+                        <input className="w-full text-center bg-transparent border-b border-neutral-700 p-1 text-4xl font-bold tracking-tight text-white mb-2 relative z-10 outline-none focus:border-pink-500" value={statsData.clients} onChange={e => setStatsData({...statsData, clients: e.target.value})} />
                     ) : (
-                        <h4 className="text-3xl lg:text-4xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-br from-white to-neutral-400 mb-2 relative z-10">{statsData.clients}</h4>
+                        <h4 className="text-4xl lg:text-5xl font-bold tracking-tight text-white mb-2 relative z-10">{statsData.clients}</h4>
                     )}
-                    <p className="text-neutral-500 text-[11px] lg:text-xs uppercase tracking-[0.2em] font-bold relative z-10">Happy Clients</p>
+                    <p className="text-neutral-400 text-xs uppercase tracking-[0.2em] font-semibold relative z-10">Happy Clients</p>
                 </motion.div>
             </div>
         </div>
@@ -866,7 +868,7 @@ export default function ClientPage({ data }: Props) {
                         whileHover={{ y: -8 }} 
                         transition={{ type: "spring", stiffness: 400, damping: 25 }} 
                         key={i} 
-                        className="bg-neutral-900/40 backdrop-blur-sm border border-neutral-800 p-8 rounded-[2rem] shadow-2xl relative overflow-hidden group hover:border-neutral-700 transition-colors"
+                        className="bg-neutral-900/30 backdrop-blur-sm p-8 rounded-[2rem] relative overflow-hidden group transition-colors"
                     >
                         {/* Decorative background element */}
                         <div className="absolute -right-8 -top-8 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl group-hover:bg-purple-500/20 transition-colors" />
@@ -898,7 +900,7 @@ export default function ClientPage({ data }: Props) {
                 ))}
             </div>
         </div>
-
+        </div>
       </div>
 
       {/* Footer */}
